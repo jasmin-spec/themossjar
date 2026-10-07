@@ -3,9 +3,10 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 const {
-  SIZE_EXTRA, CONTAINER_EXTRA, PLANT_OPTIONS, PLANT_PRICE, DELIVERY_FEE,
+  SIZE_EXTRA, CONTAINER_EXTRA, PLANT_OPTIONS, PLANT_PRICE,
+  THEME_EXTRA, MINIATURE_PRICES, SCULPTURE_PRICES,
+  MAX_MINIATURES, MAX_SCULPTURES, DELIVERY_FEE,
 } = require("../utils/pricing");
-
 const router = express.Router();
 
 // GET customisation options (the frontend uses this to build the form)
@@ -15,6 +16,11 @@ router.get("/options", (req, res) => {
     containers: CONTAINER_EXTRA,
     plants: PLANT_OPTIONS,
     plantPrice: PLANT_PRICE,
+    themes: THEME_EXTRA,
+    miniatures: MINIATURE_PRICES,
+    sculptures: SCULPTURE_PRICES,
+    maxMiniatures: MAX_MINIATURES,
+    maxSculptures: MAX_SCULPTURES,
     deliveryFee: DELIVERY_FEE,
   });
 });
@@ -48,7 +54,11 @@ router.post("/", protect, async (req, res) => {
         return res.status(400).json({ message: `Not enough stock for ${product.name}` });
       }
 
-      const c = item.customisation || {};
+      const wantsCustom =
+        !!item.customisation &&
+        !!item.customisation.size &&
+        item.customisation.size !== "ready-made";
+      const c = wantsCustom ? item.customisation : {};
       const size = c.size || "small";
       const container = c.container || "glass jar";
       const plants = (c.plants || []).filter((p) => PLANT_OPTIONS.includes(p));
@@ -57,10 +67,27 @@ router.post("/", protect, async (req, res) => {
         return res.status(400).json({ message: "Invalid size or container" });
       }
 
+      // Theme, miniatures and sculptures (invalid names are ignored, limits enforced)
+      const theme = Object.hasOwn(THEME_EXTRA, c.theme) ? c.theme : "none";
+      const miniatures = [...new Set(c.miniatures || [])]
+        .filter((m) => Object.hasOwn(MINIATURE_PRICES, m))
+        .slice(0, MAX_MINIATURES);
+      const sculptures = [...new Set(c.sculptures || [])]
+        .filter((s) => Object.hasOwn(SCULPTURE_PRICES, s))
+        .slice(0, MAX_SCULPTURES);
+
+      const miniaturesCost = miniatures.reduce((sum, m) => sum + MINIATURE_PRICES[m], 0);
+      const sculpturesCost = sculptures.reduce((sum, s) => sum + SCULPTURE_PRICES[s], 0);
+
       // The server calculates the price
       const unitPrice =
-        product.price + SIZE_EXTRA[size] + CONTAINER_EXTRA[container] + plants.length * PLANT_PRICE;
-
+        product.price +
+        SIZE_EXTRA[size] +
+        CONTAINER_EXTRA[container] +
+        plants.length * PLANT_PRICE +
+        THEME_EXTRA[theme] +
+        miniaturesCost +
+        sculpturesCost;
       itemsPrice += unitPrice * quantity;
 
       orderItems.push({
@@ -69,7 +96,17 @@ router.post("/", protect, async (req, res) => {
         image: product.image.url,
         price: unitPrice,
         quantity,
-        customisation: { size, container, plants, message: c.message || "" },
+         customisation: wantsCustom
+          ? { size, container, plants, theme, miniatures, sculptures, message: c.message || "" }
+          : {
+            size: "ready-made",
+            container: "as shown in photo",
+            plants: [],
+            theme: "none",
+            miniatures: [],
+            sculptures: [],
+            message: item.customisation?.message || "",
+          },
       });
 
       product.stock -= quantity; // reduce stock

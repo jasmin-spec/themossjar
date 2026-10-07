@@ -6,10 +6,13 @@ const orderItemSchema = new mongoose.Schema({
   image: String,
   price: Number,          // final price for ONE item after customisation
   quantity: { type: Number, default: 1 },
-  customisation: {
+    customisation: {
     size: String,
     container: String,
     plants: [String],
+    theme: String,
+    miniatures: [String],
+    sculptures: [String],
     message: String,      // e.g. a gift note
   },
 });

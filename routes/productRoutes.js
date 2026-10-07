@@ -30,7 +30,7 @@ router.get("/:id", async (req, res) => {
 // ADD product (admin only)
 router.post("/", protect, adminOnly, upload.single("image"), async (req, res) => {
   try {
-    const { name, description, price, stock } = req.body;
+        const { name, description, price, stock, customisable } = req.body;
 
     if (!name || !description || !price) {
       return res.status(400).json({ message: "Name, description and price are required" });
@@ -46,6 +46,7 @@ router.post("/", protect, adminOnly, upload.single("image"), async (req, res) =>
       description,
       price,
       stock,
+      customisable: customisable === "true" || customisable === true,
       image: { url: result.secure_url, public_id: result.public_id },
     });
 
@@ -61,15 +62,19 @@ router.put("/:id", protect, adminOnly, upload.single("image"), async (req, res) 
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const { name, description, price, stock } = req.body;
+        const { name, description, price, stock, customisable } = req.body;
     if (name) product.name = name;
     if (description) product.description = description;
     if (price) product.price = price;
     if (stock !== undefined) product.stock = stock;
-
+    if (customisable !== undefined) {
+      product.customisable = customisable === "true" || customisable === true;
+    }
     // If a new image was sent, replace the old one
     if (req.file) {
-      await cloudinary.uploader.destroy(product.image.public_id);
+           if (product.image?.public_id) {
+        await cloudinary.uploader.destroy(product.image.public_id);
+      }
       const result = await uploadToCloudinary(req.file.buffer);
       product.image = { url: result.secure_url, public_id: result.public_id };
     }
@@ -87,7 +92,9 @@ router.delete("/:id", protect, adminOnly, async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    await cloudinary.uploader.destroy(product.image.public_id);
+        if (product.image?.public_id) {
+      await cloudinary.uploader.destroy(product.image.public_id);
+    }
     await product.deleteOne();
 
     res.json({ message: "Product deleted" });

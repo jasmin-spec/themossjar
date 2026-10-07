@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -66,6 +66,17 @@ router.post("/login", async (req, res) => {
 // GET MY PROFILE (only for logged-in users)
 router.get("/me", protect, (req, res) => {
   res.json(req.user);
+});
+// ALL registered customers (admin only)
+router.get("/users", protect, adminOnly, async (req, res) => {
+  try {
+    const users = await User.find({ role: "user" })
+      .select("-password")
+      .sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;
