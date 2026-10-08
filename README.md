@@ -11,7 +11,7 @@ A full-stack e-commerce website for a handcrafted terrarium business. Customers 
 
 ## Screenshots
 
-<!-- REPLACE: add screenshots to a "screenshots" folder in the repo, then keep these lines -->
+
 ![Home page](screenshots/home.png)
 ![Product customisation](screenshots/customise.png)
 ![Admin dashboard](screenshots/admin.png)
@@ -216,10 +216,10 @@ CVC: any 3 digits
 
 ## Author
 
-**REPLACE: Your Name**
+JASMIN C T
 GitHub: [jasmin-spec](https://github.com/jasmin-spec)
-LinkedIn: REPLACE with your link
-Email: REPLACE with your email
+LinkedIn: https://www.linkedin.com/in/jasmin-c-t-24b194239/?isSelfProfile=true
+Email:jasminct.career@gmail.com
 
 ---
 
