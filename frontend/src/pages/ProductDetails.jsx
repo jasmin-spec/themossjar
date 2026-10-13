@@ -35,6 +35,10 @@ export default function ProductDetails() {
   if (error) return <div className="page"><p className="error">{error}</p></div>;
   if (!product || !options) return <div className="page"><p>Loading...</p></div>;
 
+  // Only products marked Customisable can ever be customised
+  const canCustomise = product.customisable === true;
+  const isCustom = canCustomise && customising;
+
   const toggle = (list, setList, name, max) => {
     if (list.includes(name)) return setList(list.filter((x) => x !== name));
     if (max && list.length >= max) return;
@@ -44,7 +48,7 @@ export default function ProductDetails() {
   const sumOf = (list, prices) => list.reduce((sum, n) => sum + prices[n], 0);
 
   // Price preview (the server recalculates it when the order is placed)
-  const unitPrice = !customising
+  const unitPrice = !isCustom
     ? product.price
     : product.price +
       options.sizes[size] +
@@ -62,7 +66,7 @@ export default function ProductDetails() {
         quantity,
         unitPrice,
         deliveryFees: options.deliveryFee,
-        customisation: customising
+        customisation: isCustom
           ? { size, container, plants, theme, miniatures, sculptures, message }
           : {
               size: "ready-made",
@@ -90,9 +94,15 @@ export default function ProductDetails() {
         />
 
         <div>
+          <span className={canCustomise ? "tag-inline custom" : "tag-inline ready"}>
+            {canCustomise ? "🎨 Customisable" : "📦 Ready-made"}
+          </span>
           <h1>{product.name}</h1>
           <p>{product.description}</p>
-          <p className="price big">AED {product.price}</p>
+          <p className="price big">
+            {canCustomise ? "Starting from AED " : "AED "}
+            {product.price}
+          </p>
           <p>
             {outOfStock
               ? <span className="out">Out of stock</span>
@@ -101,16 +111,18 @@ export default function ProductDetails() {
 
           {!outOfStock && (
             <>
-              {/* Customise button (outside the box) */}
-              <button
-                className={customising ? "customise-btn open" : "customise-btn"}
-                onClick={() => setCustomising(!customising)}
-              >
-                {customising ? "✖ Cancel customisation" : "🎨 Customise this terrarium"}
-              </button>
+              {/* Customise button: ONLY for customisable products */}
+              {canCustomise && (
+                <button
+                  className={customising ? "customise-btn open" : "customise-btn"}
+                  onClick={() => setCustomising(!customising)}
+                >
+                  {customising ? "✖ Cancel customisation" : "🎨 Customise this terrarium"}
+                </button>
+              )}
 
               <div className="custom-box">
-                {customising ? (
+                {isCustom ? (
                   <>
                     <h3>Customise your terrarium</h3>
 
@@ -191,12 +203,15 @@ export default function ProductDetails() {
                   </>
                 ) : (
                   <>
-                    <h3>Ready-made terrarium</h3>
-                    <p className="note">Sold exactly as shown in the photo.</p>
+                    <h3>{canCustomise ? "Standard version" : "Ready-made terrarium"}</h3>
+                    <p className="note">
+                      {canCustomise
+                        ? "Order it exactly as shown, or press Customise above to make it your own."
+                        : "Sold exactly as shown in the photo."}
+                    </p>
                   </>
                 )}
 
-                {/* Same for both: message, quantity, total, buy */}
                 <label>Gift message (optional)</label>
                 <input
                   type="text"

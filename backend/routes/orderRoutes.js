@@ -53,8 +53,9 @@ router.post("/", protect, async (req, res) => {
       if (product.stock < quantity) {
         return res.status(400).json({ message: `Not enough stock for ${product.name}` });
       }
-
       const wantsCustom =
+        product.customisable === true &&
+        !!item.customisation &&
         !!item.customisation &&
         !!item.customisation.size &&
         item.customisation.size !== "ready-made";
@@ -96,7 +97,7 @@ router.post("/", protect, async (req, res) => {
         image: product.image.url,
         price: unitPrice,
         quantity,
-         customisation: wantsCustom
+        customisation: wantsCustom
           ? { size, container, plants, theme, miniatures, sculptures, message: c.message || "" }
           : {
             size: "ready-made",
