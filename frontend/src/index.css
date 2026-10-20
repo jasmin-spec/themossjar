@@ -899,6 +899,30 @@ img { max-width: 100%; }
   .section-head h2 { font-size: 1.6rem; }
   .cta { padding: 44px 18px; }
   .cta h2 { font-size: 1.5rem; }
+  
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.instagram-btn {
+  background-color: #C13584;
+  color: #fff;
+  border: 1px solid #C13584;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.instagram-btn:hover {
+  background-color: #A52A70;
+  border-color: #A52A70;
+  transform: translateY(-2px);
+}
+
 
   /* Product pages: one column, safe widths */
   .details { grid-template-columns: minmax(0, 1fr); gap: 18px; }
@@ -978,4 +1002,37 @@ img { max-width: 100%; }
   .card-body .price { font-size: 13px; }
   .card-body .btn-link { padding: 6px 12px; font-size: 12px; }
   .tag { display: none; } /* badge is too crowded on small cards */
+}
+/* ================= WhatsApp, Instagram, order placed ================= */
+.social-float { position: fixed; right: 18px; bottom: 18px; z-index: 90;
+  display: flex; flex-direction: column; gap: 12px; }
+.sf { width: 54px; height: 54px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; color: white; font-size: 28px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); transition: transform 0.2s; text-decoration: none; }
+.sf:hover { transform: scale(1.1); }
+.sf.wa { background: #25d366; }
+.sf.ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+.wa-btn { display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #25d366; color: white; padding: 15px 28px; border-radius: 999px;
+  font-size: 16px; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.15s; }
+.wa-btn:hover { background: #1ebe5b; transform: translateY(-1px); }
+.wa-btn.small { display: inline-flex; padding: 9px 18px; font-size: 14px; margin-top: 6px; }
+
+.hint { font-size: 12.5px; color: var(--muted); margin: -4px 0 12px; }
+.form-box .hint { text-align: left; }
+.center-text { text-align: center; }
+
+.placed { max-width: 700px; }
+.placed-head { text-align: center; margin-bottom: 18px; }
+
+.footer-social { display: flex; gap: 10px; margin-top: 6px; }
+.footer-social a { width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12); display: flex; align-items: center;
+  justify-content: center; color: white; font-size: 19px; }
+.footer-social a:hover { background: var(--green-500); padding-left: 0; }
+
+@media (max-width: 560px) {
+  .sf { width: 46px; height: 46px; font-size: 24px; }
+  .social-float { right: 12px; bottom: 12px; }
 }

@@ -2,14 +2,18 @@ const express = require("express");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
+const sendOrderEmails = require("../utils/sendEmail");
 const {
   SIZE_EXTRA, CONTAINER_EXTRA, PLANT_OPTIONS, PLANT_PRICE,
   THEME_EXTRA, MINIATURE_PRICES, SCULPTURE_PRICES,
   MAX_MINIATURES, MAX_SCULPTURES, DELIVERY_FEE,
 } = require("../utils/pricing");
+
 const router = express.Router();
 
-// GET customisation options (the frontend uses this to build the form)
+const asArray = (v) => (Array.isArray(v) ? v : []);
+
+// Customisation options (the frontend builds its form from this)
 router.get("/options", (req, res) => {
   res.json({
     sizes: SIZE_EXTRA,
@@ -25,22 +29,20 @@ router.get("/options", (req, res) => {
   });
 });
 
-// CREATE order (logged-in users)
+// CREATE order (logged-in users). The SERVER calculates every price.
 router.post("/", protect, async (req, res) => {
   try {
-    const { items, deliveryMode, deliveryAddress, phone, paymentMethod } = req.body;
+    const { items, deliveryMode, deliveryAddress, phone } = req.body;
 
-    if (!items || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "No items in order" });
     }
     if (!["delivery", "pickup"].includes(deliveryMode)) {
       return res.status(400).json({ message: "Choose delivery or pickup" });
     }
-    if (!["stripe", "cod"].includes(paymentMethod)) {
-      return res.status(400).json({ message: "Choose Stripe or Cash on Delivery" });
-    }
 
     const orderItems = [];
+    const stockChanges = [];
     let itemsPrice = 0;
 
     for (const item of items) {
@@ -49,75 +51,87 @@ router.post("/", protect, async (req, res) => {
         return res.status(404).json({ message: "A product was not found" });
       }
 
-      const quantity = Number(item.quantity) || 1;
+      const quantity = Math.max(1, Math.floor(Number(item.quantity)) || 1);
       if (product.stock < quantity) {
         return res.status(400).json({ message: `Not enough stock for ${product.name}` });
       }
+
+      // Only products marked Customisable can be customised
       const wantsCustom =
         product.customisable === true &&
         !!item.customisation &&
-        !!item.customisation &&
         !!item.customisation.size &&
         item.customisation.size !== "ready-made";
-      const c = wantsCustom ? item.customisation : {};
-      const size = c.size || "small";
-      const container = c.container || "glass jar";
-      const plants = (c.plants || []).filter((p) => PLANT_OPTIONS.includes(p));
 
-      if (!(size in SIZE_EXTRA) || !(container in CONTAINER_EXTRA)) {
-        return res.status(400).json({ message: "Invalid size or container" });
+      let unitPrice;
+      let customisation;
+
+      if (wantsCustom) {
+        const c = item.customisation;
+        const size = c.size;
+        const container = c.container || "glass jar";
+
+        if (!Object.hasOwn(SIZE_EXTRA, size) || !Object.hasOwn(CONTAINER_EXTRA, container)) {
+          return res.status(400).json({ message: "Invalid size or container" });
+        }
+
+        const plants = [...new Set(asArray(c.plants))].filter((p) => PLANT_OPTIONS.includes(p));
+        const theme = Object.hasOwn(THEME_EXTRA, c.theme) ? c.theme : "none";
+        const miniatures = [...new Set(asArray(c.miniatures))]
+          .filter((m) => Object.hasOwn(MINIATURE_PRICES, m))
+          .slice(0, MAX_MINIATURES);
+        const sculptures = [...new Set(asArray(c.sculptures))]
+          .filter((s) => Object.hasOwn(SCULPTURE_PRICES, s))
+          .slice(0, MAX_SCULPTURES);
+
+        unitPrice =
+          product.price +
+          SIZE_EXTRA[size] +
+          CONTAINER_EXTRA[container] +
+          plants.length * PLANT_PRICE +
+          THEME_EXTRA[theme] +
+          miniatures.reduce((sum, m) => sum + MINIATURE_PRICES[m], 0) +
+          sculptures.reduce((sum, s) => sum + SCULPTURE_PRICES[s], 0);
+
+        customisation = {
+          size, container, plants, theme, miniatures, sculptures,
+          message: String(c.message || "").slice(0, 200),
+        };
+      } else {
+        unitPrice = product.price;
+        customisation = {
+          size: "ready-made",
+          container: "as shown in photo",
+          plants: [],
+          theme: "none",
+          miniatures: [],
+          sculptures: [],
+          message: String(item.customisation?.message || "").slice(0, 200),
+        };
       }
 
-      // Theme, miniatures and sculptures (invalid names are ignored, limits enforced)
-      const theme = Object.hasOwn(THEME_EXTRA, c.theme) ? c.theme : "none";
-      const miniatures = [...new Set(c.miniatures || [])]
-        .filter((m) => Object.hasOwn(MINIATURE_PRICES, m))
-        .slice(0, MAX_MINIATURES);
-      const sculptures = [...new Set(c.sculptures || [])]
-        .filter((s) => Object.hasOwn(SCULPTURE_PRICES, s))
-        .slice(0, MAX_SCULPTURES);
-
-      const miniaturesCost = miniatures.reduce((sum, m) => sum + MINIATURE_PRICES[m], 0);
-      const sculpturesCost = sculptures.reduce((sum, s) => sum + SCULPTURE_PRICES[s], 0);
-
-      // The server calculates the price
-      const unitPrice =
-        product.price +
-        SIZE_EXTRA[size] +
-        CONTAINER_EXTRA[container] +
-        plants.length * PLANT_PRICE +
-        THEME_EXTRA[theme] +
-        miniaturesCost +
-        sculpturesCost;
       itemsPrice += unitPrice * quantity;
 
       orderItems.push({
         product: product._id,
         name: product.name,
-        image: product.image.url,
+        image: product.image?.url || "",
         price: unitPrice,
         quantity,
-        customisation: wantsCustom
-          ? { size, container, plants, theme, miniatures, sculptures, message: c.message || "" }
-          : {
-            size: "ready-made",
-            container: "as shown in photo",
-            plants: [],
-            theme: "none",
-            miniatures: [],
-            sculptures: [],
-            message: item.customisation?.message || "",
-          },
+        customisation,
       });
+      stockChanges.push({ product, quantity });
+    }
 
-      product.stock -= quantity; // reduce stock
+    // Everything is valid: now reduce the stock
+    for (const { product, quantity } of stockChanges) {
+      product.stock -= quantity;
       await product.save();
     }
 
     const deliveryFee = DELIVERY_FEE[deliveryMode];
-
-    // Delivery needs an address; if not sent, use the one from the user's profile
-    const address = deliveryMode === "delivery" ? deliveryAddress || req.user.address : "Store pickup";
+    const address =
+      deliveryMode === "delivery" ? deliveryAddress || req.user.address : "Store pickup";
 
     const order = await Order.create({
       user: req.user._id,
@@ -128,8 +142,10 @@ router.post("/", protect, async (req, res) => {
       itemsPrice,
       deliveryFee,
       totalPrice: itemsPrice + deliveryFee,
-      paymentMethod,
+      paymentMethod: "cod", // pay on delivery or pickup (confirmed on WhatsApp)
     });
+
+    sendOrderEmails(order, req.user); // optional emails; never blocks the order
 
     res.status(201).json(order);
   } catch (err) {
@@ -137,7 +153,7 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-// MY orders (logged-in user sees only their own)
+// MY orders
 router.get("/my", protect, async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
@@ -147,7 +163,7 @@ router.get("/my", protect, async (req, res) => {
   }
 });
 
-// ALL orders (admin only), with the customer's details
+// ALL orders (admin only)
 router.get("/", protect, adminOnly, async (req, res) => {
   try {
     const orders = await Order.find()
@@ -165,7 +181,7 @@ router.get("/:id", protect, async (req, res) => {
     const order = await Order.findById(req.params.id).populate("user", "name email phone address");
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    const isOwner = order.user._id.toString() === req.user._id.toString();
+    const isOwner = order.user && order.user._id.toString() === req.user._id.toString();
     if (!isOwner && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not allowed" });
     }
@@ -189,7 +205,7 @@ router.put("/:id/status", protect, adminOnly, async (req, res) => {
 
     order.orderStatus = orderStatus;
 
-    // Cash on Delivery is paid when the order is delivered
+    // Pay-on-delivery orders become "paid" when delivered
     if (orderStatus === "delivered" && order.paymentMethod === "cod") {
       order.paymentStatus = "paid";
       order.paidAt = new Date();
@@ -197,6 +213,19 @@ router.put("/:id/status", protect, adminOnly, async (req, res) => {
 
     await order.save();
     res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE order (admin only)
+router.delete("/:id", protect, adminOnly, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    await order.deleteOne();
+    res.json({ message: "Order deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

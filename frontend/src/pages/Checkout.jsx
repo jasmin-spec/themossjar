@@ -11,7 +11,6 @@ export default function Checkout() {
   const [deliveryMode, setDeliveryMode] = useState("delivery");
   const [address, setAddress] = useState(user?.address || "");
   const [phone, setPhone] = useState(user?.phone || "");
-  const [paymentMethod, setPaymentMethod] = useState("stripe");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,6 +25,11 @@ export default function Checkout() {
 
   const handlePlaceOrder = async () => {
     setError("");
+    if (!phone.trim()) return setError("Please enter your WhatsApp number");
+    if (deliveryMode === "delivery" && !address.trim()) {
+      return setError("Please enter your delivery address");
+    }
+
     setLoading(true);
     try {
       const { data: order } = await api.post("/orders", {
@@ -33,15 +37,8 @@ export default function Checkout() {
         deliveryMode,
         deliveryAddress: address,
         phone,
-        paymentMethod,
       });
-
-      if (paymentMethod === "stripe") {
-        const { data } = await api.post(`/payments/create-checkout-session/${order._id}`);
-        window.location.href = data.url;
-      } else {
-        navigate("/my-orders", { state: { placed: true } });
-      }
+      navigate(`/order-placed/${order._id}`, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
       setLoading(false);
@@ -55,7 +52,7 @@ export default function Checkout() {
 
       <div className="summary">
         <h3>Order summary</h3>
-        <p><b>{product.name}</b> × {quantity}</p>
+        <p><b>{product.name}</b> x {quantity}</p>
 
         {readyMade ? (
           <p>
@@ -102,26 +99,21 @@ export default function Checkout() {
           </>
         )}
 
-        <label>Phone number</label>
+        <label>Your WhatsApp number</label>
         <input value={phone} onChange={(e) => setPhone(e.target.value)} />
       </div>
 
       <div className="summary">
-        <h3>Payment method</h3>
-        <label className="check">
-          <input type="radio" checked={paymentMethod === "stripe"}
-            onChange={() => setPaymentMethod("stripe")} />
-          Pay now by card (Stripe)
-        </label>
-        <label className="check">
-          <input type="radio" checked={paymentMethod === "cod"}
-            onChange={() => setPaymentMethod("cod")} />
-          Cash on Delivery
-        </label>
+        <h3>How ordering works</h3>
+        <p className="note">
+          1. Press <b>Place Order</b>. Your order is saved.<br />
+          2. Next, send your order summary to us on <b>WhatsApp</b>.<br />
+          3. We confirm with you, and you <b>pay on delivery or pickup</b>.
+        </p>
       </div>
 
       <button onClick={handlePlaceOrder} disabled={loading}>
-        {loading ? "Please wait..." : paymentMethod === "stripe" ? "Place Order & Pay" : "Place Order"}
+        {loading ? "Please wait..." : "Place Order"}
       </button>
     </div>
   );

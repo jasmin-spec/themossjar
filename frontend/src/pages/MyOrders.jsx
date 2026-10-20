@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { FaWhatsapp } from "react-icons/fa";
 import api from "../api";
+import { useAuth } from "../context/AuthContext";
+import { buildOrderMessage, whatsappLink } from "../utils/whatsapp";
 
 export default function MyOrders() {
-  const { state } = useLocation();
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -16,19 +18,9 @@ export default function MyOrders() {
       .finally(() => setLoading(false));
   }, []);
 
-  const payNow = async (orderId) => {
-    try {
-      const { data } = await api.post(`/payments/create-checkout-session/${orderId}`);
-      window.location.href = data.url;
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not start payment");
-    }
-  };
-
   return (
     <div className="page">
       <h1>My Orders</h1>
-      {state?.placed && <p className="success">✅ Order placed successfully!</p>}
       {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
       {!loading && orders.length === 0 && <p>You have no orders yet.</p>}
@@ -40,26 +32,31 @@ export default function MyOrders() {
             <span>{new Date(o.createdAt).toLocaleDateString()}</span>
           </div>
 
-          {o.items.map((item) => (
-            <div className="order-item" key={item._id}>
-              <img src={item.image} alt={item.name} />
-              <div>
-                <b>{item.name}</b> × {item.quantity}
-                <br />
-                                <small>
-                  {item.customisation.size}, {item.customisation.container}
-                  {item.customisation.plants?.length > 0 && `, ${item.customisation.plants.join(", ")}`}
-                  {item.customisation.theme && item.customisation.theme !== "none" && ` | Theme: ${item.customisation.theme}`}
-                  {item.customisation.miniatures?.length > 0 && ` | Miniatures: ${item.customisation.miniatures.join(", ")}`}
-                  {item.customisation.sculptures?.length > 0 && ` | Sculptures: ${item.customisation.sculptures.join(", ")}`}
-                </small>
+          {o.items.map((item) => {
+            const c = item.customisation || {};
+            return (
+              <div className="order-item" key={item._id}>
+                {item.image && <img src={item.image} alt={item.name} />}
+                <div>
+                  <b>{item.name}</b> x {item.quantity}
+                  <br />
+                  <small>
+                    {c.size === "ready-made"
+                      ? "Ready-made"
+                      : `${c.size}, ${c.container}`}
+                    {c.plants?.length > 0 && `, ${c.plants.join(", ")}`}
+                    {c.theme && c.theme !== "none" && ` | Theme: ${c.theme}`}
+                    {c.miniatures?.length > 0 && ` | Miniatures: ${c.miniatures.join(", ")}`}
+                    {c.sculptures?.length > 0 && ` | Sculptures: ${c.sculptures.join(", ")}`}
+                  </small>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <p>
-            {o.deliveryMode === "delivery" ? "🚚 Home delivery" : "🏪 Store pickup"} |{" "}
-            {o.paymentMethod === "stripe" ? "Card" : "Cash on Delivery"}
+            {o.deliveryMode === "delivery" ? "Home delivery" : "Store pickup"} |{" "}
+            {o.paymentMethod === "stripe" ? "Paid by card" : "Pay on delivery / pickup"}
           </p>
           <p>
             Status: <b>{o.orderStatus}</b> | Payment:{" "}
@@ -67,11 +64,16 @@ export default function MyOrders() {
           </p>
           <p className="price">Total: AED {o.totalPrice}</p>
 
-          {o.paymentMethod === "stripe" &&
-            o.paymentStatus === "pending" &&
-            o.orderStatus !== "cancelled" && (
-              <button onClick={() => payNow(o._id)}>Pay now</button>
-            )}
+          {o.orderStatus !== "delivered" && (
+            <a
+              href={whatsappLink(buildOrderMessage(o, user))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="wa-btn small"
+            >
+              <FaWhatsapp size={18} /> Send on WhatsApp
+            </a>
+          )}
         </div>
       ))}
     </div>

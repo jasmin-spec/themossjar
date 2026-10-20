@@ -31,7 +31,7 @@ export default function Home() {
         <div><span>🪴</span><b>Handcrafted</b><small>Made fresh for every order</small></div>
         <div><span>🎨</span><b>Fully Customisable</b><small>Size, container and plants</small></div>
         <div><span>🚚</span><b>Delivery or Pickup</b><small>Whichever suits you</small></div>
-        <div><span>🔒</span><b>Secure Payment</b><small>Card or Cash on Delivery</small></div>
+        <div><span>💬</span><b>Order on WhatsApp</b><small>Quick and personal</small></div>
       </section>
 
       {/* 3. PRODUCTS */}
@@ -72,7 +72,7 @@ export default function Home() {
           <div className="step">
             <span className="step-no">3</span>
             <h3>Receive</h3>
-            <p>Pay by card or cash, and get it delivered or collect it.</p>
+            <p>Send your order on WhatsApp, then pay on delivery or pickup.</p>
           </div>
         </div>
       </section>
@@ -87,11 +87,27 @@ export default function Home() {
       </section>
 
       {/* 6. FINAL CALL TO ACTION */}
-      <section className="cta">
-        <h2>Ready to create your own terrarium?</h2>
-        <p>Start with a base design and make it truly yours.</p>
-        <a href="#terrariums" className="btn-link light">Start Shopping</a>
-      </section>
+     
+<section className="cta">
+  <h2>Ready to create your own terrarium?</h2>
+  <p>Start with a base design and make it truly yours.</p>
+
+  <div className="cta-buttons">
+    <a href="#terrariums" className="btn-link light">
+      Start Shopping
+    </a>
+
+    <a
+      href="https://www.instagram.com/themossjar_terrarium/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn-link instagram-btn"
+    >
+      <i className="fa-brands fa-instagram"></i> Follow Us on Instagram
+    </a>
+  </div>
+</section>
+
     </>
   );
 }

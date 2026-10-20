@@ -25,7 +25,7 @@ const slides = [
   {
     badge: "🚚 Easy ordering",
     title: "Delivered to your door",
-    text: "Pay by card or Cash on Delivery, or collect it from our store for free.",
+    text: "Order on WhatsApp, pay on delivery, or collect it from our store for free.",
     cta: "How It Works",
     link: "#how",
   },
