@@ -2,7 +2,7 @@ const express = require("express");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
-const sendOrderEmails = require("../utils/sendEmail");
+//const sendOrderEmails = require("../utils/sendEmail");
 const {
   SIZE_EXTRA, CONTAINER_EXTRA, PLANT_OPTIONS, PLANT_PRICE,
   THEME_EXTRA, MINIATURE_PRICES, SCULPTURE_PRICES,
@@ -145,7 +145,7 @@ router.post("/", protect, async (req, res) => {
       paymentMethod: "cod", // pay on delivery or pickup (confirmed on WhatsApp)
     });
 
-    sendOrderEmails(order, req.user); // optional emails; never blocks the order
+    //sendOrderEmails(order, req.user); // optional emails; never blocks the order
 
     res.status(201).json(order);
   } catch (err) {
