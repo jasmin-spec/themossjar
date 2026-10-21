@@ -1,5 +1,5 @@
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-import { ADMIN_WHATSAPP, INSTAGRAM_USER } from "../config";
+import { ADMIN_WHATSAPP, INSTAGRAM_URL} from "../config";
 
 export default function SocialFloat() {
   const hello = encodeURIComponent(
@@ -18,7 +18,7 @@ export default function SocialFloat() {
         <FaWhatsapp />
       </a>
       <a
-        href={`https://www.instagram.com/${INSTAGRAM_USER}`}
+        href={`https://www.instagram.com/${INSTAGRAM_URL}`}
         target="_blank"
         rel="noopener noreferrer"
         className="sf ig"

@@ -2,10 +2,9 @@ import { Link } from "react-router-dom";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import {
-  ADMIN_WHATSAPP, WHATSAPP_DISPLAY, INSTAGRAM_USER,
+  ADMIN_WHATSAPP, WHATSAPP_DISPLAY, INSTAGRAM_URL, INSTAGRAM_HANDLE,
   SHOP_EMAIL, SHOP_LOCATION, SHOP_HOURS,
 } from "../config";
-
 export default function Footer() {
   const { user } = useAuth();
 
@@ -24,8 +23,7 @@ export default function Footer() {
           <div className="footer-social">
             <a href={`https://wa.me/${ADMIN_WHATSAPP}`} target="_blank"
               rel="noopener noreferrer" aria-label="WhatsApp"><FaWhatsapp /></a>
-            <a href={`https://www.instagram.com/${INSTAGRAM_USER}`} target="_blank"
-              rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
           </div>
         </div>
 
@@ -60,8 +58,8 @@ export default function Footer() {
           <a href={`https://wa.me/${ADMIN_WHATSAPP}`} target="_blank" rel="noopener noreferrer">
             WhatsApp: {WHATSAPP_DISPLAY}
           </a>
-          <a href={`https://www.instagram.com/${INSTAGRAM_USER}`} target="_blank" rel="noopener noreferrer">
-            Instagram: @{INSTAGRAM_USER}
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+            Instagram: @{INSTAGRAM_HANDLE}
           </a>
           <span>{SHOP_EMAIL}</span>
           <span>{SHOP_HOURS}</span>
