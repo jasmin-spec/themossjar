@@ -57,7 +57,20 @@ export default function AdminOrders() {
           <p>
             <b>Customer:</b> {o.user?.name || "Deleted user"} | {o.user?.email}
             <br />
-            <b>Phone:</b> {o.phone} | <b>Address:</b> {o.deliveryAddress}
+                        <b>WhatsApp:</b>{" "}
+            {/^\+\d{8,15}$/.test(String(o.phone).replace(/[\s\-()]/g, "")) ? (
+              <a
+                className="wa-chip"
+                href={`https://wa.me/${String(o.phone).replace(/[^\d]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {o.phone}
+              </a>
+            ) : (
+              o.phone
+            )}{" "}
+            | <b>Address:</b> {o.deliveryAddress}
           </p>
 
           {o.items.map((item) => (

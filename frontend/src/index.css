@@ -1036,3 +1036,11 @@ img { max-width: 100%; }
   .sf { width: 46px; height: 46px; font-size: 24px; }
   .social-float { right: 12px; bottom: 12px; }
 }
+
+/* Admin users: WhatsApp column */
+.wa-chip { display: inline-flex; align-items: center; gap: 6px; background: #e7f9ee;
+  color: #138a3e; padding: 4px 12px; border-radius: 999px; font-size: 13px;
+  font-weight: 600; text-decoration: none; white-space: nowrap; }
+.wa-chip:hover { background: #25d366; color: white; }
+.user-search { width: 100%; padding: 10px 14px; margin: 6px 0 12px;
+  border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; }
