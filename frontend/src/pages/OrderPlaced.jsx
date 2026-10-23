@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp, FaCheck } from "react-icons/fa";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { buildOrderMessage, whatsappLink } from "../utils/whatsapp";
@@ -24,26 +24,32 @@ export default function OrderPlaced() {
   const link = whatsappLink(buildOrderMessage(order, user));
 
   return (
-    <div className="page placed">
-      <div className="placed-head">
-        <img src="/logo.jpg" alt="The Moss Jar logo" className="form-logo" />
+    <div className="page op">
+      <div className="op-hero">
+        <div className="op-tick"><FaCheck size={30} /></div>
         <h1>Order placed!</h1>
-        <p>Order #{String(order._id).slice(-6)} is saved. One last step to confirm it:</p>
+        <p>Order <b>#{String(order._id).slice(-6)}</b> is saved. One last step to confirm it.</p>
       </div>
 
-      <div className="summary">
+      <div className="op-card op-wa">
+        <ol className="op-steps">
+          <li className="done"><span><FaCheck size={11} /></span> Order saved</li>
+          <li className="now"><span>2</span> Send it on WhatsApp</li>
+          <li><span>3</span> We confirm with you</li>
+        </ol>
+
         <a href={link} target="_blank" rel="noopener noreferrer" className="wa-btn">
           <FaWhatsapp size={22} /> Send order on WhatsApp
         </a>
-        <p className="hint center-text">
+        <p className="op-fine">
           WhatsApp opens with your full order already typed. Just press <b>Send</b>.
         </p>
       </div>
 
-      <div className="summary">
+      <div className="op-card">
         <h3>Your order</h3>
         {order.items.map((item) => (
-          <div className="order-item" key={item._id}>
+          <div className="op-item" key={item._id}>
             {item.image && <img src={item.image} alt={item.name} />}
             <div>
               <b>{item.name}</b> x {item.quantity}
@@ -54,11 +60,15 @@ export default function OrderPlaced() {
                   : `${item.customisation.size}, ${item.customisation.container}`}
               </small>
             </div>
+            <span className="op-amt">AED {item.price * item.quantity}</span>
           </div>
         ))}
-        <p>Delivery: AED {order.deliveryFee}</p>
-        <p className="price big">Total: AED {order.totalPrice}</p>
-        <p>You pay on {order.deliveryMode === "delivery" ? "delivery" : "pickup"}.</p>
+        <div className="co-row"><span>Delivery</span><span>AED {order.deliveryFee}</span></div>
+        <div className="co-total"><span>Total</span><span>AED {order.totalPrice}</span></div>
+        <p className="op-fine left">
+          {order.deliveryMode === "delivery" ? "Home delivery" : "Store pickup"} |{" "}
+          pay on {order.deliveryMode === "delivery" ? "delivery" : "pickup"}
+        </p>
       </div>
 
       <p className="center-text">
