@@ -1225,3 +1225,95 @@ button.co-place:disabled { background: #9fd9b5; }
   .pd-panel, .co-card, .co-summary, .mo-card, .op-card { padding: 16px; }
   .mo-track em { font-size: 10.5px; }
 }
+/* ================= Admin dashboard ================= */
+.ad { max-width: 1150px; }
+.ad-head { background: linear-gradient(135deg, var(--green-900), var(--green-700)); color: white;
+  border-radius: 18px; padding: 26px 28px; margin-bottom: 18px; }
+.ad-head h1 { color: white; margin: 0 0 4px; font-size: 1.8rem; }
+.ad-head p { margin: 0; color: #cfe5d6; font-size: 14.5px; }
+
+.ad-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; background: white;
+  padding: 6px; border-radius: 14px; box-shadow: var(--shadow); width: fit-content; max-width: 100%; }
+button.ad-tab { display: inline-flex; align-items: center; gap: 8px; background: transparent;
+  color: var(--green-700); padding: 10px 20px; border-radius: 10px; font-size: 14px; box-shadow: none; }
+button.ad-tab:hover { background: var(--green-100); transform: none; box-shadow: none; }
+button.ad-tab.on { background: var(--green-700); color: white; }
+
+.ad-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.ad-stat { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow);
+  border-left: 5px solid var(--green-500); }
+.ad-stat.warn { border-left-color: var(--warning); }
+.ad-stat span { display: block; color: var(--muted); font-size: 13px; }
+.ad-stat b { display: block; font-family: "Playfair Display", serif; font-size: 1.7rem; color: var(--green-900); }
+.ad-empty { background: white; border-radius: 14px; padding: 36px; text-align: center; color: var(--muted); box-shadow: var(--shadow); }
+
+.ad-order { background: white; border-radius: 16px; padding: 20px 22px; margin-bottom: 16px;
+  box-shadow: var(--shadow); border-left: 5px solid var(--green-500); }
+.ad-order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.ad-order-id { font-size: 16px; color: var(--green-900); }
+.ad-order-top small { display: block; color: var(--muted); }
+.ad-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.ad-badge { display: inline-block; padding: 4px 13px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+.ad-badge.green { background: #e0f4e8; color: #1b6b3f; }
+.ad-badge.orange { background: #fff0dc; color: #b55d0b; }
+.ad-badge.blue { background: #e3f0fb; color: #1e5f99; }
+.ad-badge.purple { background: #f1e6f7; color: #6f3f88; }
+
+.ad-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.ad-box { background: #f7faf8; border-radius: 12px; padding: 12px 14px; }
+.ad-box h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--green-700); }
+.ad-box p { margin: 3px 0; font-size: 14px; word-break: break-word; }
+.ad-muted { color: var(--muted); font-size: 13px; }
+
+.ad-items { border-top: 1px dashed var(--border); padding-top: 12px; }
+.ad-item { display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
+.ad-item img { width: 62px; height: 62px; object-fit: cover; border-radius: 10px; flex: 0 0 62px; }
+.ad-item-info { font-size: 14px; min-width: 0; }
+.ad-item-info small { display: block; color: var(--muted); text-transform: capitalize; margin-top: 2px; }
+
+.ad-order-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
+  border-top: 1px dashed var(--border); margin-top: 8px; padding-top: 14px; }
+.ad-total small { display: block; color: var(--muted); }
+.ad-total b { font-family: "Playfair Display", serif; font-size: 1.5rem; color: var(--green-700); }
+.ad-actions { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.ad-actions label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }
+.ad-actions select { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit;
+  text-transform: capitalize; background: white; }
+button.ad-del { display: inline-flex; align-items: center; gap: 6px; background: white; color: var(--danger);
+  border: 1.5px solid var(--danger); box-shadow: none; }
+button.ad-del:hover { background: var(--danger); color: white; transform: none; box-shadow: none; }
+
+.ad-card { background: white; border-radius: 16px; padding: 22px; box-shadow: var(--shadow); margin-bottom: 18px; }
+.ad-card h3 { margin: 0 0 14px; }
+.ad-form { display: grid; gap: 10px; }
+.ad-form input[type="text"], .ad-form input:not([type]), .ad-form input[type="number"], .ad-form input[type="file"] {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: inherit; font-size: 14px; background: #fbfcfb; }
+.ad-form input:focus { outline: none; border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(63,143,90,.18); background: white; }
+.ad-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ad-check { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+
+.ad-prow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.ad-prow:last-child { border-bottom: none; }
+.ad-prow img { width: 70px; height: 70px; object-fit: cover; border-radius: 12px; }
+.ad-prow-name { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.ad-field { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }
+.ad-field input { width: 100px; padding: 9px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; }
+.ad-prow-actions { display: flex; gap: 8px; }
+
+/* Users table (same markup, nicer look) */
+.ad .table-wrap { border: 1px solid var(--border); border-radius: 12px; }
+.ad th { white-space: nowrap; }
+.ad td { vertical-align: middle; }
+
+@media (max-width: 760px) {
+  .ad-stats { grid-template-columns: 1fr; }
+  .ad-cols, .ad-form-row { grid-template-columns: 1fr; }
+  .ad-head { padding: 20px; }
+  .ad-tabs { width: 100%; }
+  button.ad-tab { flex: 1; justify-content: center; padding: 10px 8px; }
+  .ad-field input { width: 100%; }
+  .ad-field { flex: 1 1 45%; }
+  .ad-prow-actions { width: 100%; }
+  .ad-prow-actions button { flex: 1; }
+}

@@ -29,25 +29,38 @@ function ProductRow({ product, onDone, onError }) {
   };
 
   return (
-    <div className="admin-row">
-      <img src={product.image?.url || "https://placehold.co/60x60"} alt={product.name} />
-      <div className="grow">
+    <div className="ad-prow">
+      <img src={product.image?.url || "https://placehold.co/80x80"} alt={product.name} />
+
+      <div className="ad-prow-name">
         <b>{product.name}</b>
-        <br />
-        <small>{product.customisable ? "🎨 Customisable" : "📦 Ready-made"}</small>
+        <span className={product.customisable ? "ad-badge purple" : "ad-badge green"}>
+          {product.customisable ? "Customisable" : "Ready-made"}
+        </span>
       </div>
-      <label>Price
+
+      <label className="ad-field">
+        Price (AED)
         <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
       </label>
-      <label>Stock
+      <label className="ad-field">
+        Stock
         <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
       </label>
-      <label className="check">
-        <input type="checkbox" checked={customisable} onChange={(e) => setCustomisable(e.target.checked)} />
+
+      <label className="ad-check">
+        <input
+          type="checkbox"
+          checked={customisable}
+          onChange={(e) => setCustomisable(e.target.checked)}
+        />
         Customisable
       </label>
-      <button onClick={save}>Save</button>
-      <button className="danger" onClick={remove}>Delete</button>
+
+      <div className="ad-prow-actions">
+        <button type="button" onClick={save}>Save</button>
+        <button type="button" className="ad-del" onClick={remove}>Delete</button>
+      </div>
     </div>
   );
 }
@@ -72,7 +85,6 @@ export default function AdminProducts() {
     setMsg("");
     if (!image) return setError("Please choose an image");
 
-    // Files must be sent as FormData (not plain JSON)
     const data = new FormData();
     Object.entries(form).forEach(([key, value]) => data.append(key, value));
     data.append("image", image);
@@ -100,14 +112,16 @@ export default function AdminProducts() {
       {msg && <p className="success">{msg}</p>}
       {error && <p className="error">{error}</p>}
 
-      <div className="summary">
+      <section className="ad-card">
         <h3>Add a new terrarium</h3>
-        <form onSubmit={handleAdd} className="admin-form">
+        <form onSubmit={handleAdd} className="ad-form">
           <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
           <input name="description" placeholder="Description" value={form.description} onChange={handleChange} required />
-          <input name="price" type="number" min="0" placeholder="Price (AED)" value={form.price} onChange={handleChange} required />
-          <input name="stock" type="number" min="0" placeholder="Stock" value={form.stock} onChange={handleChange} required />
-          <label className="check">
+          <div className="ad-form-row">
+            <input name="price" type="number" min="0" placeholder="Price (AED)" value={form.price} onChange={handleChange} required />
+            <input name="stock" type="number" min="0" placeholder="Stock" value={form.stock} onChange={handleChange} required />
+          </div>
+          <label className="ad-check">
             <input
               type="checkbox"
               checked={form.customisable}
@@ -118,14 +132,14 @@ export default function AdminProducts() {
           <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} required />
           <button type="submit" disabled={saving}>{saving ? "Uploading..." : "Add Terrarium"}</button>
         </form>
-      </div>
+      </section>
 
-      <div className="summary">
+      <section className="ad-card">
         <h3>All terrariums ({products.length})</h3>
         {products.map((p) => (
           <ProductRow key={p._id} product={p} onDone={afterChange} onError={afterError} />
         ))}
-      </div>
+      </section>
     </div>
   );
 }
