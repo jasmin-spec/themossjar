@@ -69,27 +69,24 @@ export default function HeroSlider({ products = [] }) {
 
   return (
     <section
-      className="hx"
+      className="hz"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {slides.map((s, i) => {
         const photo = photos.length ? photos[i % photos.length] : null;
         return (
-          <div key={s.title} className={i === index ? "hx-slide active" : "hx-slide"}>
-            <div className="hx-media">
-              {photo && <img src={photo} alt="" />}
-            </div>
-            <div className="hx-shade" />
+          <div key={s.title} className={i === index ? "hz-slide active" : "hz-slide"}>
+            <div className="hz-media">{photo && <img src={photo} alt="" />}</div>
 
-            <div className="hx-inner">
-              <div className="hx-copy">
-                <span className="hx-eyebrow">{s.badge}</span>
+            <div className="hz-inner">
+              <div className="hz-copy">
+                <span className="hz-eyebrow">{s.badge}</span>
                 <h1>{renderTitle(s)}</h1>
                 <p>{s.text}</p>
-                <div className="hx-buttons">
-                  <a href={s.link} className="hx-btn solid">{s.cta}</a>
-                  <a href="#how" className="hx-btn ghost">How it works</a>
+                <div className="hz-buttons">
+                  <a href={s.link} className="hz-btn solid">{s.cta}</a>
+                  <a href="#how" className="hz-btn ghost">How it works</a>
                 </div>
               </div>
             </div>
@@ -97,24 +94,24 @@ export default function HeroSlider({ products = [] }) {
         );
       })}
 
-      <div className="hx-controls">
-        <span className="hx-count">
+      <div className="hz-controls">
+        <span className="hz-count">
           <b>{two(index + 1)}</b>
           <i />
           {two(slides.length)}
         </span>
 
-        <div className="hx-dots">
+        <div className="hz-dots">
           {slides.map((s, i) => (
             <span
               key={s.title}
-              className={i === index ? "hx-dot active" : "hx-dot"}
+              className={i === index ? "hz-dot active" : "hz-dot"}
               onClick={() => setIndex(i)}
             />
           ))}
         </div>
 
-        <div className="hx-arrows">
+        <div className="hz-arrows">
           <button type="button" onClick={prev} aria-label="Previous slide">‹</button>
           <button type="button" onClick={next} aria-label="Next slide">›</button>
         </div>
